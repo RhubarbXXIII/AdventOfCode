@@ -1,11 +1,13 @@
+from utils import parse
+
+
 def part1() -> int:
     left_locations = []
     right_locations = []
 
     with open("input.txt") as file:
         for line in file.readlines():
-            line = line.replace('\n', '')
-            line = line.split('   ')
+            line = parse(line, '   ')
             left_locations.append(int(line[0]))
             right_locations.append(int(line[1]))
 
@@ -25,8 +27,7 @@ def part2() -> int:
 
     with open("input.txt") as file:
         for line in file.readlines():
-            line = line.replace('\n', '')
-            line = line.split('   ')
+            line = parse(line, '   ')
             left_locations.append(int(line[0]))
             right_locations.append(int(line[1]))
 
