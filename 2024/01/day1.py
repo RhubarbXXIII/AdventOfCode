@@ -1,15 +1,14 @@
-from utils import parse
+from utils import parse, read_file
 
 
 def part1() -> int:
     left_locations = []
     right_locations = []
 
-    with open("input.txt") as file:
-        for line in file.readlines():
-            line = parse(line, '   ')
-            left_locations.append(int(line[0]))
-            right_locations.append(int(line[1]))
+    for line in read_file("input.txt"):
+        line = parse(line, '   ')
+        left_locations.append(int(line[0]))
+        right_locations.append(int(line[1]))
 
     left_locations.sort()
     right_locations.sort()
@@ -25,11 +24,10 @@ def part2() -> int:
     left_locations = []
     right_locations = []
 
-    with open("input.txt") as file:
-        for line in file.readlines():
-            line = parse(line, '   ')
-            left_locations.append(int(line[0]))
-            right_locations.append(int(line[1]))
+    for line in read_file("input.txt"):
+        line = parse(line, '   ')
+        left_locations.append(int(line[0]))
+        right_locations.append(int(line[1]))
 
     right_location_counts = {}
     for right_location in right_locations:
