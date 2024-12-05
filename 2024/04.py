@@ -1,6 +1,9 @@
+import re
+
 from utils import read_file, DIRECTIONS
 
 
+MATCH_STRING = "XMAS"
 DIAGONAL_OFFSETS = ((-1, 1), (1, 1), (1, -1), (-1, -1))
 
 
@@ -17,25 +20,19 @@ def part1() -> int:
                     if vertical_direction == 0 and horizontal_direction == 0:
                         continue
 
-                    found = True
-                    for index, char in enumerate("XMAS"):
-                        position = (
-                            row_index + index * vertical_direction,
-                            column_index + index * horizontal_direction
-                        )
+                    if (
+                        row_index + (len(MATCH_STRING) - 1) * vertical_direction < 0
+                        or row_index + (len(MATCH_STRING) - 1) * vertical_direction >= (len(grid))
+                        or column_index + (len(MATCH_STRING) - 1) * horizontal_direction < 0
+                        or column_index + (len(MATCH_STRING) - 1) * horizontal_direction >= (len(grid[0]))
+                    ):
+                        continue
 
-                        if (
-                            position[0] < 0 or position[0] >= len(grid)
-                            or position[1] < 0 or position[1] >= len(grid[0])
-                        ):
-                            found = False
-                            break
-
-                        if grid[position[0]][position[1]] != char:
-                            found = False
-                            break
-
-                    if found:
+                    search_string = ''.join(
+                        grid[row_index + i * vertical_direction][column_index + i * horizontal_direction]
+                        for i, _ in enumerate(MATCH_STRING)
+                    )
+                    if search_string == MATCH_STRING:
                         found_count += 1
 
     return found_count
@@ -57,9 +54,9 @@ def part2() -> int:
                 for offset in DIAGONAL_OFFSETS
             ] * 2
 
-            for index, _ in enumerate(DIAGONAL_OFFSETS):
-                if ''.join(cross_chars[index:index + 4]) == "MMSS":
-                    found_count += 1
+            if re.match(r'.*MMSS.*', ''.join(cross_chars)):
+                found_count += 1
+                continue
 
     return found_count
 
