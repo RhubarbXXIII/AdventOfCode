@@ -6,9 +6,10 @@ from utils import parse, read_file
 def is_safe_level(previous_level: int, current_level: int, sign: int) -> bool:
     level_difference = current_level - previous_level
     return (
-            level_difference != 0
-            and int(copysign(1, level_difference)) == sign
-            and abs(level_difference) <= 3)
+        level_difference != 0
+        and int(copysign(1, level_difference)) == sign
+        and abs(level_difference) <= 3
+    )
 
 
 def is_safe(report: list[int]) -> bool:
