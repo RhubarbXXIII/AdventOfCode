@@ -1,67 +1,60 @@
-from collections import defaultdict
-from functools import cmp_to_key
-from typing import Callable
+from math import ceil, log10
 
 from utils import read_file, parse
 
 
-def parse_file(filename: str) -> [dict[int, set[int]], list[list[int]]]:
-    rules: dict[int, set[int]] = defaultdict(set)
-    updates: list[list[int]] = []
+def parse_file(filename: str) -> list[tuple[int, list[int]]]:
+    calibrations = []
 
-    rules_complete = False
-    for line in read_file("input.txt"):
-        if not line.strip():
-            rules_complete = True
-            continue
+    for line in read_file(filename):
+        line_split = parse(line, ': ')
+        calibrations.append((int(line_split[0]), list(map(int, parse(line_split[1], ' ')))))
 
-        if not rules_complete:
-            before, after = map(int, parse(line, '|'))
-            rules[before].add(after)
-        else:
-            updates.append(list(map(int, parse(line, ','))))
-
-    return rules, updates
+    return calibrations
 
 
-def rules_comparator(rules: dict[int, set[int]]) -> Callable[[int, int], int]:
-    def comparator(left: int, right: int) -> int:
-        if left == right:
-            return 0
-        elif left in rules and right in rules[left]:
-            return -1
-        else:
-            return 1
+def concatenate(left: int, right: int):
+    return left * pow(10, int(log10(right)) + 1) + right
 
-    return comparator
+
+def check_remaining_calibrations(remaining_operands: list[int]) -> set[int]:
+    if len(remaining_operands) == 1:
+        return set(remaining_operands)
+
+    return check_remaining_calibrations(
+        [remaining_operands[0] + remaining_operands[1]] + remaining_operands[2:]
+    ).union(check_remaining_calibrations(
+        [remaining_operands[0] * remaining_operands[1]] + remaining_operands[2:]
+    ))
+
+
+def check_remaining_calibrations_with_concatenation(remaining_operands: list[int]) -> set[int]:
+    if len(remaining_operands) == 1:
+        return set(remaining_operands)
+
+    return check_remaining_calibrations_with_concatenation(
+        [remaining_operands[0] + remaining_operands[1]] + remaining_operands[2:]
+    ).union(check_remaining_calibrations_with_concatenation(
+        [remaining_operands[0] * remaining_operands[1]] + remaining_operands[2:]
+    )).union(check_remaining_calibrations_with_concatenation(
+        [concatenate(remaining_operands[0], remaining_operands[1])] + remaining_operands[2:]
+    ))
 
 
 def part1() -> int:
-    rules, updates = parse_file("input.txt")
-
-    sum = 0
-    for update in updates:
-        update_sorted = sorted(update, key=cmp_to_key(rules_comparator(rules)))
-        if update != update_sorted:
-            continue
-
-        sum += update[len(update) // 2]
-
-    return sum
+    return sum(
+        result
+        for result, operands in parse_file("input.txt")
+        if result in check_remaining_calibrations(operands)
+    )
 
 
 def part2() -> int:
-    rules, updates = parse_file("input.txt")
-
-    sum = 0
-    for update in updates:
-        update_sorted = sorted(update, key=cmp_to_key(rules_comparator(rules)))
-        if update == update_sorted:
-            continue
-
-        sum += update_sorted[len(update) // 2]
-
-    return sum
+    return sum(
+        result
+        for result, operands in parse_file("input.txt")
+        if result in check_remaining_calibrations_with_concatenation(operands)
+    )
 
 
 print(f"Part 1: {part1()}")
