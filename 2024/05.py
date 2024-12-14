@@ -10,7 +10,7 @@ def parse_file(filename: str) -> [dict[int, set[int]], list[list[int]]]:
     updates: list[list[int]] = []
 
     rules_complete = False
-    for line in read_file("input.txt"):
+    for line in read_file(filename):
         if not line.strip():
             rules_complete = True
             continue

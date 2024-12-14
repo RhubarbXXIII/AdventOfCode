@@ -1,9 +1,10 @@
 import re
 
-from utils import read_file, DIRECTIONS
+from utils import read_file
 
 
 MATCH_STRING = "XMAS"
+DIRECTIONS = (-1, 0, 1)
 DIAGONAL_OFFSETS = ((-1, 1), (1, 1), (1, -1), (-1, -1))
 
 
