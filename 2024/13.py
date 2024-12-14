@@ -1,113 +1,88 @@
-from collections import defaultdict
+from dataclasses import dataclass
+from math import modf
 
-from utils import read_file, parse, Direction
+from utils import read_file, Position, parse_number
 
 
-def parse_file(filename: str) -> list[list[str]]:
-    plots = []
+@dataclass
+class Machine:
+    button_a: Position = Position()
+    button_b: Position = Position()
+    prize: Position = Position()
+
+
+def parse_position(line: str) -> Position:
+    values_string = line.split(':')[1]
+    return Position(
+        parse_number(values_string.split(',')[0]),
+        parse_number(values_string.split(',')[1])
+    )
+
+def parse_file(filename: str) -> list[Machine]:
+    machines = [Machine()]
     for line in read_file(filename):
-        plots.append(list(line.strip()))
+        if "Button A" in line:
+            machines[-1].button_a = parse_position(line)
+        elif "Button B" in line:
+            machines[-1].button_b = parse_position(line)
+        elif "Prize" in line:
+            machines[-1].prize = parse_position(line)
+        elif not line.strip():
+            machines.append(Machine())
 
-    return plots
+    return machines
 
 
 def part1() -> int:
-    plots = parse_file("input.txt")
+    machines = parse_file("input.txt")
 
-    visited_plots = set()
+    token_count = 0
 
-    price = 0
+    for machine in machines:
+        determinant = machine.button_a.row * machine.button_b.column - machine.button_b.row * machine.button_a.column
+        if determinant == 0:
+            continue
 
-    for row_index, row in enumerate(plots):
-        for column_index, plot in enumerate(row):
-            if (row_index, column_index) in visited_plots:
-                continue
+        button_a_count = (
+            (machine.prize.row * machine.button_b.column - machine.prize.column * machine.button_b.row) / determinant
+        )
+        button_b_count = (
+            (machine.button_a.row * machine.prize.column - machine.prize.row * machine.button_a.column) / determinant
+        )
 
-            region_area = 0
-            region_perimeter = 0
+        if modf(button_a_count)[0] != 0 or modf(button_b_count)[0] != 0:
+            continue
 
-            queue = [(row_index, column_index)]
-            while queue:
-                current_plot_position = queue.pop()
-                if current_plot_position in visited_plots:
-                    continue
+        token_count += 3 * int(button_a_count) + int(button_b_count)
 
-                visited_plots.add(current_plot_position)
-
-                region_area += 1
-                for direction in Direction:
-                    neighbor_row_index = current_plot_position[0] + direction[0]
-                    neighbor_column_index = current_plot_position[1] + direction[1]
-
-                    if (
-                        0 <= neighbor_row_index < len(plots)
-                        and 0 <= neighbor_column_index < len(plots[0])
-                        and plots[neighbor_row_index][neighbor_column_index] == plot
-                    ):
-                        queue.append((neighbor_row_index, neighbor_column_index))
-                        continue
-
-                    region_perimeter += 1
-
-            price += region_area * region_perimeter
-
-    return price
+    return token_count
 
 
 def part2() -> int:
-    plots = parse_file("test.txt")
+    machines = parse_file("input.txt")
 
-    visited_plots = set()
+    token_count = 0
 
-    price = 0
+    for machine in machines:
+        machine.prize = Position(machine.prize.row + 10000000000000, machine.prize.column + 10000000000000)
 
-    for row_index, row in enumerate(plots):
-        for column_index, plot in enumerate(row):
-            if (row_index, column_index) in visited_plots:
-                continue
+        determinant = machine.button_a.row * machine.button_b.column - machine.button_b.row * machine.button_a.column
+        if determinant == 0:
+            continue
 
-            region_area = 0
-            region_side_count = 0
+        button_a_count = (
+            (machine.prize.row * machine.button_b.column - machine.prize.column * machine.button_b.row) / determinant
+        )
+        button_b_count = (
+            (machine.button_a.row * machine.prize.column - machine.prize.row * machine.button_a.column) / determinant
+        )
 
-            queue = [(row_index, column_index)]
-            while queue:
-                current_plot_position = queue.pop()
-                if current_plot_position in visited_plots:
-                    continue
+        if modf(button_a_count)[0] != 0 or modf(button_b_count)[0] != 0:
+            continue
 
-                visited_plots.add(current_plot_position)
+        token_count += 3 * int(button_a_count) + int(button_b_count)
 
-                region_area += 1
-
-                side_count = 0
-                for direction in Direction:
-                    neighbor_row_index = current_plot_position[0] + direction[0]
-                    neighbor_column_index = current_plot_position[1] + direction[1]
-
-                    other_neighbor_row_index = current_plot_position[0] + direction.rotate_right()[0]
-                    other_neighbor_column_index = current_plot_position[1] + direction.rotate_right()[1]
-
-                    if (
-                        0 <= neighbor_row_index < len(plots)
-                        and 0 <= neighbor_column_index < len(plots[0])
-                        and plots[neighbor_row_index][neighbor_column_index] == plot
-                    ):
-                        queue.append((neighbor_row_index, neighbor_column_index))
-                        continue
-
-                    side_count += 1
-
-                if side_count == 2:
-                    region_side_count += 1
-                elif side_count == 3:
-                    region_side_count += 2
-                elif side_count == 4:
-                    region_side_count += 4
-
-            print(f"{plot}: {region_area} * {region_side_count}")
-            price += region_area * region_side_count
-
-    return price
+    return token_count
 
 
 print(f"Part 1: {part1()}")

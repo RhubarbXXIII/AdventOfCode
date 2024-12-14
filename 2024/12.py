@@ -1,6 +1,4 @@
-from collections import defaultdict
-
-from utils import read_file, parse, Direction
+from utils import read_file, Direction, Position
 
 
 def parse_file(filename: str) -> list[list[str]]:
@@ -20,13 +18,13 @@ def part1() -> int:
 
     for row_index, row in enumerate(plots):
         for column_index, plot in enumerate(row):
-            if (row_index, column_index) in visited_plots:
+            if Position(row_index, column_index) in visited_plots:
                 continue
 
             region_area = 0
             region_perimeter = 0
 
-            queue = [(row_index, column_index)]
+            queue = [Position(row_index, column_index)]
             while queue:
                 current_plot_position = queue.pop()
                 if current_plot_position in visited_plots:
@@ -36,15 +34,14 @@ def part1() -> int:
 
                 region_area += 1
                 for direction in Direction:
-                    neighbor_row_index = current_plot_position[0] + direction[0]
-                    neighbor_column_index = current_plot_position[1] + direction[1]
+                    neighbor_position = current_plot_position + direction
 
                     if (
-                        0 <= neighbor_row_index < len(plots)
-                        and 0 <= neighbor_column_index < len(plots[0])
-                        and plots[neighbor_row_index][neighbor_column_index] == plot
+                        0 <= neighbor_position.row < len(plots)
+                        and 0 <= neighbor_position.column < len(plots[0])
+                        and plots[neighbor_position.row][neighbor_position.column] == plot
                     ):
-                        queue.append((neighbor_row_index, neighbor_column_index))
+                        queue.append(neighbor_position)
                         continue
 
                     region_perimeter += 1
@@ -55,7 +52,7 @@ def part1() -> int:
 
 
 def part2() -> int:
-    plots = parse_file("test.txt")
+    plots = parse_file("input.txt")
 
     visited_plots = set()
 
@@ -63,13 +60,13 @@ def part2() -> int:
 
     for row_index, row in enumerate(plots):
         for column_index, plot in enumerate(row):
-            if (row_index, column_index) in visited_plots:
+            if Position(row_index, column_index) in visited_plots:
                 continue
 
             region_area = 0
             region_side_count = 0
 
-            queue = [(row_index, column_index)]
+            queue = [Position(row_index, column_index)]
             while queue:
                 current_plot_position = queue.pop()
                 if current_plot_position in visited_plots:
@@ -79,29 +76,42 @@ def part2() -> int:
 
                 region_area += 1
 
-                side_count = 0
+                sides = set()
                 for direction in Direction:
-                    neighbor_row_index = current_plot_position[0] + direction[0]
-                    neighbor_column_index = current_plot_position[1] + direction[1]
+                    neighbor_position = current_plot_position + direction
 
                     if (
-                        0 <= neighbor_row_index < len(plots)
-                        and 0 <= neighbor_column_index < len(plots[0])
-                        and plots[neighbor_row_index][neighbor_column_index] == plot
+                        0 <= neighbor_position.row < len(plots)
+                        and 0 <= neighbor_position.column < len(plots[0])
+                        and plots[neighbor_position.row][neighbor_position.column] == plot
                     ):
-                        queue.append((neighbor_row_index, neighbor_column_index))
+                        other_neighbor_position = current_plot_position + direction.rotate_right()
+                        non_neighbor_position = neighbor_position + direction.rotate_right()
+
+                        if (
+                            0 <= other_neighbor_position.row < len(plots)
+                            and 0 <= other_neighbor_position.column < len(plots[0])
+                            and plots[other_neighbor_position.row][other_neighbor_position.column] == plot
+                            and plots[non_neighbor_position.row][non_neighbor_position.column] != plot
+                        ):
+                            region_side_count += 1
+
+                        queue.append(neighbor_position)
                         continue
 
-                    side_count += 1
+                    sides.add(direction)
 
-                if side_count == 2:
-                    region_side_count += 1
-                elif side_count == 3:
-                    region_side_count += 2
-                elif side_count == 4:
+                if len(sides) == 4:
                     region_side_count += 4
+                elif len(sides) == 3:
+                    region_side_count += 2
+                elif (
+                    len(sides) == 2
+                    and not (Direction.UP in sides and Direction.DOWN in sides)
+                    and not (Direction.RIGHT in sides and Direction.LEFT in sides)
+                ):
+                    region_side_count += 1
 
-            print(f"{plot}: {region_area} * {region_side_count}")
             price += region_area * region_side_count
 
     return price
