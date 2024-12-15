@@ -45,6 +45,19 @@ class Direction(Enum):
         elif self == Direction.LEFT:
             return Direction.RIGHT
 
+    @classmethod
+    def from_arrow(cls, arrow: str):
+        if arrow == '^':
+            return Direction.UP
+        elif arrow == '>':
+            return Direction.RIGHT
+        elif arrow == 'v':
+            return Direction.DOWN
+        elif arrow == '<':
+            return Direction.LEFT
+        else:
+            raise ValueError
+
 
 @dataclass(frozen=True)
 class Position:
@@ -86,7 +99,8 @@ def read_file(filename: str):
             yield line
 
 def parse(line: str, separator: str = ' ') -> list[str]:
-    return line.replace('\n', '').split(separator)
+    line = line.replace('\n', '')
+    return line.split(separator) if separator != '' else list(line)
 
 
 def parse_number(string: str) -> int:

@@ -6,7 +6,7 @@ from utils import read_file, Position, Direction, parse
 def parse_file(filename: str) -> list[list[int]]:
     grid = []
     for line in read_file(filename):
-        grid.append(list(map(int, list(line.strip()))))
+        grid.append(list(map(int, parse(line, ''))))
 
     return grid
 
