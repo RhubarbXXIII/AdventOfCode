@@ -75,19 +75,22 @@ class Position:
     def __str__(self):
         return f"({self.row}, {self.column})"
 
-    def direction_to(self, other) -> Direction:
+    def direction_to(self, other) -> Direction | None:
         if not isinstance(other, Position):
             raise ValueError
 
-        for direction in Direction:
-            if (
-                copysign(1, other.row - self.row) == copysign(1, direction[0])
-                and copysign(1, other.column - self.column) == copysign(1, direction[1])
-            ):
-                return direction
-
-        raise ValueError
-
+        row_difference = other.row - self.row
+        column_difference = other.column - self.column
+        if row_difference < 0 and column_difference == 0:
+            return Direction.UP
+        elif row_difference == 0 and column_difference > 0:
+            return Direction.RIGHT
+        elif row_difference > 0 and column_difference == 0:
+            return Direction.DOWN
+        elif row_difference == 0 and column_difference < 0:
+            return Direction.LEFT
+        else:
+            return None
 
 
 def read_file(filename: str):
@@ -97,6 +100,7 @@ def read_file(filename: str):
     with open(f"../input/{year}/{day}/{filename}", 'r') as file:
         for line in file.readlines():
             yield line
+
 
 def parse(line: str, separator: str = ' ') -> list[str]:
     line = line.replace('\n', '')
