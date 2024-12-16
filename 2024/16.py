@@ -73,13 +73,15 @@ def build_maze(maze_grid: list[list[str]]) -> dict[Position, set[MazeEdge]]:
             translation_count = 0
             rotation_count = 0
 
+            previous_direction = direction
             current_direction = direction
             current_position = junction
-            current_passable_directions = passable_directions_at(
-                maze_grid, current_position.row, current_position.column
-            )
+            current_passable_directions = passable_directions
 
-            while len(current_passable_directions) > 1 or maze_grid[junction.row][junction.column] in ('S', 'E'):
+            while (
+                len(current_passable_directions) > 1
+                or maze_grid[current_position.row][current_position.column] in ('S', 'E')
+            ):
                 if current_position in junctions and current_position != junction:
                     maze[junction].add(MazeEdge(
                         current_position,
@@ -98,14 +100,14 @@ def build_maze(maze_grid: list[list[str]]) -> dict[Position, set[MazeEdge]]:
                 translation_count += 1
 
                 if len(current_passable_directions) == 2:
-                    next_direction = [
+                    if previous_direction != current_direction:
+                        rotation_count += 1
+
+                    previous_direction = current_direction
+                    current_direction = [
                         passable_direction for passable_direction in current_passable_directions
                         if passable_direction != current_direction.opposite()
                     ][0]
-                    if current_direction != next_direction:
-                        rotation_count += 1
-
-                    current_direction = next_direction
 
     return maze
 
