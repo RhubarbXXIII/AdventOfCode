@@ -93,6 +93,13 @@ class Position:
             return None
 
 
+    def manhattan_distance_to(self, other) -> int:
+        if not isinstance(other, Position):
+            raise ValueError
+
+        return abs(other.row - self.row) + abs(other.column - self.column)
+
+
 def read_file(filename: str):
     calling_file_path_directories = inspect.stack()[1].filename.split(os.path.sep)
     year = calling_file_path_directories[-2]
