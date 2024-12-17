@@ -12,7 +12,8 @@ class PathNode:
     g: int
     h: int
 
-    previous: Self | None = None
+    previous_heading: Direction
+    previous_node: Self | None = None
 
     def f(self) -> int:
         return self.g + self.h
@@ -30,6 +31,8 @@ class MazeEdge:
 
     translation_count: int
     rotation_count: int
+
+    positions: frozenset[Position]
 
 
 def parse_file(filename: str) -> [list[list[str]], Position, Position]:
@@ -73,6 +76,8 @@ def build_maze(maze_grid: list[list[str]]) -> dict[Position, set[MazeEdge]]:
             translation_count = 0
             rotation_count = 0
 
+            positions = {junction}
+
             previous_direction = direction
             current_direction = direction
             current_position = junction
@@ -88,7 +93,8 @@ def build_maze(maze_grid: list[list[str]]) -> dict[Position, set[MazeEdge]]:
                         direction,
                         current_direction,
                         translation_count,
-                        rotation_count
+                        rotation_count,
+                        frozenset(positions)
                     ))
                     break
 
@@ -96,6 +102,8 @@ def build_maze(maze_grid: list[list[str]]) -> dict[Position, set[MazeEdge]]:
                 current_passable_directions = passable_directions_at(
                     maze_grid, current_position.row, current_position.column
                 )
+
+                positions.add(current_position)
 
                 translation_count += 1
 
@@ -113,10 +121,14 @@ def build_maze(maze_grid: list[list[str]]) -> dict[Position, set[MazeEdge]]:
 
 
 def part1() -> int:
-    maze_grid, start, end = parse_file("test_small.txt")
-    maze = build_maze(maze_grid)
+    maze_grid, start, end = parse_file("input.txt")
 
-    current_node = PathNode(start, 0, start.manhattan_distance_to(end))
+    current_node = PathNode(
+        position=start,
+        g=0,
+        h=start.manhattan_distance_to(end),
+        previous_heading=Direction.RIGHT
+    )
 
     visited = set()
 
@@ -137,14 +149,15 @@ def part1() -> int:
             if next_position in visited or maze_grid[next_position.row][next_position.column] == '#':
                 continue
 
-            previous_heading = current_node.previous.position.direction_to(current_node.position) if current_node.previous else None
+            previous_heading = current_node.previous_heading
             current_heading = current_node.position.direction_to(next_position)
 
             queue.put(PathNode(
                 position=next_position,
-                g=current_node.g + 1 + (1000 if previous_heading and current_heading != previous_heading else 0),
+                g=current_node.g + 1 + (1000 if current_heading != previous_heading else 0),
                 h=next_position.manhattan_distance_to(end),
-                previous=current_node
+                previous_heading=current_heading,
+                previous_node=current_node
             ))
 
     translation_count = 0
@@ -154,7 +167,7 @@ def part1() -> int:
     while current_node:
         path.append(current_node.position)
 
-        current_node = current_node.previous
+        current_node = current_node.previous_node
 
     path.reverse()
 
@@ -171,9 +184,15 @@ def part1() -> int:
 
 
 def part2() -> int:
-    maze, start, end = parse_file("test_small.txt")
+    maze_grid, start, end = parse_file("test.txt")
+    maze = build_maze(maze_grid)
 
-    current_node = PathNode(start, 0, start.manhattan_distance_to(end))
+    current_node = PathNode(
+        position=start,
+        g=0,
+        h=start.manhattan_distance_to(end),
+        previous_heading=Direction.RIGHT
+    )
 
     visited = set()
     path_ends = []
@@ -182,8 +201,9 @@ def part2() -> int:
     queue.put(current_node)
     while not queue.empty():
         current_node = queue.get()
-        if current_node.g > 11048:
+        if current_node.position in visited:
             continue
+
         if path_ends and current_node.g > path_ends[-1].g:
             continue
 
@@ -193,28 +213,42 @@ def part2() -> int:
 
             path_ends.append(current_node)
             continue
+            # break
 
-        for direction in Direction:
-            next_position = current_node.position + direction
-            if next_position in visited or maze[next_position.row][next_position.column] == '#':
-                continue
+        visited.add(current_node.position)
 
-            previous_heading = current_node.previous.position.direction_to(current_node.position) if current_node.previous else None
-            current_heading = current_node.position.direction_to(next_position)
-
+        for junction in maze[current_node.position]:
             queue.put(PathNode(
-                position=next_position,
-                g=current_node.g + 1 + (1000 if previous_heading and current_heading != previous_heading else 0),
-                h=next_position.manhattan_distance_to(end),
-                previous=current_node
+                position=junction.destination,
+                g=(
+                    current_node.g
+                    + junction.translation_count
+                    + 1000 * (
+                        junction.rotation_count + (1 if junction.source_heading != current_node.previous_heading else 0)
+                    )
+                ),
+                h=(
+                    junction.destination.manhattan_distance_to(end)
+                    # + (1000000 if junction.destination not in visited else 0)
+                ),
+                previous_heading=junction.destination_heading,
+                previous_node=current_node
             ))
+
+    # return current_node.g
 
     best_positions = set()
     for path_end in path_ends:
         current_node = path_end
-        while current_node:
-            best_positions.add(current_node.position)
-            current_node = current_node.previous
+        while current_node.previous_node:
+            maze_edge = [
+                maze_edge
+                for maze_edge in maze[current_node.previous_node.position]
+                if maze_edge.destination == current_node.position
+            ][0]
+            best_positions.update(maze_edge.positions)
+
+            current_node = current_node.previous_node
 
     return len(best_positions)
 
