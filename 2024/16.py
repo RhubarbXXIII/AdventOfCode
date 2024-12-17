@@ -1,3 +1,4 @@
+import sys
 from collections import defaultdict
 from dataclasses import dataclass
 from queue import PriorityQueue
@@ -184,58 +185,53 @@ def part1() -> int:
 
 
 def part2() -> int:
-    maze_grid, start, end = parse_file("test.txt")
+    maze_grid, start, end = parse_file("input.txt")
     maze = build_maze(maze_grid)
 
     current_node = PathNode(
         position=start,
         g=0,
-        h=start.manhattan_distance_to(end),
+        h=0,
         previous_heading=Direction.RIGHT
     )
 
-    visited = set()
+    best_cost_to_end = sys.maxsize
+    best_cost_to_position = defaultdict(lambda: sys.maxsize)
     path_ends = []
 
     queue = PriorityQueue()
     queue.put(current_node)
     while not queue.empty():
         current_node = queue.get()
-        if current_node.position in visited:
-            continue
-
-        if path_ends and current_node.g > path_ends[-1].g:
+        if current_node.g > best_cost_to_end:
             continue
 
         if current_node.position == end:
-            if path_ends and current_node.g > path_ends[-1].g:
-                break
-
+            best_cost_to_end = current_node.g
             path_ends.append(current_node)
             continue
-            # break
 
-        visited.add(current_node.position)
+        if current_node.g > best_cost_to_position[current_node.position, current_node.previous_heading]:
+            continue
+
+        best_cost_to_position[current_node.position, current_node.previous_heading] = current_node.g
 
         for junction in maze[current_node.position]:
+            if junction.source_heading == current_node.previous_heading.opposite():
+                continue
+
             queue.put(PathNode(
                 position=junction.destination,
                 g=(
                     current_node.g
                     + junction.translation_count
-                    + 1000 * (
-                        junction.rotation_count + (1 if junction.source_heading != current_node.previous_heading else 0)
-                    )
+                    + 1000 * junction.rotation_count
+                    + (1000 if junction.source_heading != current_node.previous_heading else 0)
                 ),
-                h=(
-                    junction.destination.manhattan_distance_to(end)
-                    # + (1000000 if junction.destination not in visited else 0)
-                ),
+                h=0,
                 previous_heading=junction.destination_heading,
                 previous_node=current_node
             ))
-
-    # return current_node.g
 
     best_positions = set()
     for path_end in path_ends:
@@ -244,7 +240,10 @@ def part2() -> int:
             maze_edge = [
                 maze_edge
                 for maze_edge in maze[current_node.previous_node.position]
-                if maze_edge.destination == current_node.position
+                if (
+                    maze_edge.destination == current_node.position
+                    and maze_edge.destination_heading == current_node.previous_heading
+                )
             ][0]
             best_positions.update(maze_edge.positions)
 
