@@ -3,7 +3,7 @@ import os.path
 import re
 from dataclasses import dataclass
 from enum import Enum
-from math import copysign
+from typing import Self
 
 
 class Direction(Enum):
@@ -98,6 +98,21 @@ class Position:
             raise ValueError
 
         return abs(other.row - self.row) + abs(other.column - self.column)
+
+
+@dataclass(frozen=True)
+class AStarPathNode:
+    position: Position
+    g: int
+    h: int
+
+    previous_node: Self | None = None
+
+    def f(self) -> int:
+        return self.g + self.h
+
+    def __lt__(self, other):
+        return self.f() < other.f()
 
 
 def read_file(filename: str):
