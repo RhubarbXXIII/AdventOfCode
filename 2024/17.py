@@ -1,6 +1,6 @@
 import functools
 
-from utils import read_file, parse, parse_number
+from utils.parsing import parse, parse_number, read_file
 
 
 def parse_file(filename: str) -> [list[int], list[int]]:

@@ -2,7 +2,7 @@ from collections import defaultdict
 from functools import cmp_to_key
 from typing import Callable
 
-from utils import read_file, parse
+from utils.parsing import parse, read_file
 
 
 def parse_file(filename: str) -> [dict[int, set[int]], list[list[int]]]:

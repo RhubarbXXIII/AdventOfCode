@@ -1,6 +1,6 @@
 import re
 
-from utils import read_file
+from utils.parsing import read_file
 
 
 def parse_mul(instruction: str) -> [int, int]:

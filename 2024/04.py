@@ -1,7 +1,6 @@
 import re
 
-from utils import read_file
-
+from utils.parsing import read_file
 
 MATCH_STRING = "XMAS"
 DIRECTIONS = (-1, 0, 1)

@@ -1,6 +1,7 @@
 from collections import deque
 
-from utils import read_file, Position, Direction, parse
+from utils.grid import Direction, Position
+from utils.parsing import parse, read_file
 
 
 def parse_file(filename: str) -> list[list[int]]:

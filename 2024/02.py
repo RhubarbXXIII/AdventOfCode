@@ -1,6 +1,6 @@
 from math import copysign
 
-from utils import parse, read_file
+from utils.parsing import parse, read_file
 
 
 def is_safe_level(previous_level: int, current_level: int, sign: int) -> bool:

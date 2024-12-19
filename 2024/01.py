@@ -1,4 +1,4 @@
-from utils import parse, read_file
+from utils.parsing import parse, read_file
 
 
 def part1() -> int:

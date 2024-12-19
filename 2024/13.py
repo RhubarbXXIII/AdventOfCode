@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from math import modf
 
-from utils import read_file, Position, parse_number
+from utils.grid import Position
+from utils.parsing import parse_number, read_file
 
 
 @dataclass

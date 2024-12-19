@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from queue import PriorityQueue
 from typing import Self
 
-from utils import read_file, parse, Position, Direction
+from utils.grid import Direction, Position
+from utils.parsing import parse, read_file
 
 
 @dataclass(frozen=True)

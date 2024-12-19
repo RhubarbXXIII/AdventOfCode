@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from utils import read_file, parse
+from utils.parsing import read_file
 
 
 def parse_file(filename: str) -> [tuple[int, int], dict[str, list[tuple[int, int]]]]:

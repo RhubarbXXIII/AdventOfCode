@@ -1,6 +1,6 @@
-from math import ceil, log10
+from math import log10
 
-from utils import read_file, parse
+from utils.parsing import parse, read_file
 
 
 def parse_file(filename: str) -> list[tuple[int, list[int]]]:

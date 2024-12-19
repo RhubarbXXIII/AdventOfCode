@@ -1,6 +1,7 @@
 from queue import PriorityQueue
 
-from utils import read_file, parse, Position, Direction, AStarPathNode
+from utils.grid import AStarPathNode, Direction, Position
+from utils.parsing import parse, read_file
 
 
 def parse_file(filename: str) -> list[Position]:

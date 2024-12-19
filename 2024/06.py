@@ -1,4 +1,5 @@
-from utils import Direction, read_file, Position, parse
+from utils.grid import Direction, Position
+from utils.parsing import parse, read_file
 
 
 def parse_file(filename: str) -> [list[list[int]], Position, set[Position]]:
