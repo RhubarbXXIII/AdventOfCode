@@ -82,35 +82,20 @@ class Keypad:
 
         return instructions
 
-    def get_code_for_instructions(self, instructions: str) -> str:
-        code = []
-        current_position = self.button_positions['A']
-
-        for instruction in instructions:
-            if instruction == 'A':
-                code.append(self.buttons[current_position.row][current_position.column])
-            else:
-                current_position += Direction.from_arrow(instruction)
-
-        return ''.join(code)
-
 
 NUMBER_KEYPAD = Keypad(["789", "456", "123", ".0A"])
 CONTROL_KEYPAD = Keypad([".^A", "<v>"])
 
 
-# def get_instructions_for_code_segment
-
-
 @functools.cache
-def get_instructions_for_code(code: str, keypad: Keypad, outer_keypad_count: int) -> str:
+def get_instruction_count_for_code(code: str, keypad: Keypad, outer_keypad_count: int) -> int:
     if outer_keypad_count < 0:
-        return code
-
-    instructions = ""
+        return len(code)
 
     if code == 'A':
-        return 'A'
+        return 1
+
+    count = 0
 
     start_index = 0
     end_index = code.find('A')
@@ -118,27 +103,22 @@ def get_instructions_for_code(code: str, keypad: Keypad, outer_keypad_count: int
         for index in range(start_index, end_index + 1):
             current_button = code[index - 1] if index > 0 else 'A'
             next_button = code[index]
-            possible_instructions = [
-                get_instructions_for_code(
-                    possible_instruction, CONTROL_KEYPAD, outer_keypad_count - 1
-                )
-                for possible_instruction in keypad.get_possible_instructions_for_step(current_button, next_button)
-            ]
-            possible_instructions.sort(key=len)
 
-            instructions += possible_instructions[0]
+            count += min(
+                get_instruction_count_for_code(possible_instruction, CONTROL_KEYPAD, outer_keypad_count - 1)
+                for possible_instruction in keypad.get_possible_instructions_for_step(current_button, next_button)
+            )
 
         end_index = code.find('A', end_index + 1)
 
-    print(f"Instructions for {code} at level {outer_keypad_count}: {len(instructions)}...")
-    return instructions
+    return count
 
 
 def part1() -> int:
     codes = parse_file("input.txt")
 
     return sum(
-        parse_number(code) * len(get_instructions_for_code(code, NUMBER_KEYPAD, 2))
+        parse_number(code) * get_instruction_count_for_code(code, NUMBER_KEYPAD, 2)
         for code in codes
     )
 
@@ -146,11 +126,10 @@ def part1() -> int:
 def part2() -> int:
     codes = parse_file("input.txt")
 
-    return 0
-    # return sum(
-    #     parse_number(code) * len(get_instructions_for_code(code, NUMBER_KEYPAD, 25))
-    #     for code in codes
-    # )
+    return sum(
+        parse_number(code) * get_instruction_count_for_code(code, NUMBER_KEYPAD, 25)
+        for code in codes
+    )
 
 
 print(f"Part 1: {part1()}")
