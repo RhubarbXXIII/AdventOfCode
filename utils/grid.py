@@ -55,6 +55,18 @@ class Direction(Enum):
         else:
             raise ValueError
 
+    def to_arrow(self) -> str:
+        if self == Direction.UP:
+            return '^'
+        elif self == Direction.RIGHT:
+            return '>'
+        elif self == Direction.DOWN:
+            return 'v'
+        elif self == Direction.LEFT:
+            return '<'
+        else:
+            raise ValueError
+
 
 @dataclass(frozen=True)
 class Position:
