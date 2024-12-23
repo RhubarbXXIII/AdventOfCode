@@ -1,75 +1,60 @@
-from collections import defaultdict, deque
+from collections import defaultdict
 
-from utils.parsing import parse_number, read_file
+from utils.parsing import parse, read_file
 
 
-def parse_file(filename: str) -> list[int]:
-    seeds = []
+def parse_file(filename: str) -> list[tuple[str, str]]:
+    connections = []
     for line in read_file(filename):
-        seeds.append(parse_number(line))
+        connection = parse(line, '-')
+        connections.append((connection[0], connection[1]))
 
-    return seeds
-
-
-PRUNE = 16777216
-
-
-def step(number: int) -> int:
-    number = ((64 * number) ^ number) % PRUNE
-    number = ((number // 32) ^ number) % PRUNE
-    number = ((2048 * number) ^ number) % PRUNE
-    return number
-
-
-def step_n(number: int, count: int) -> int:
-    for _ in range(count):
-        number = step(number)
-
-    return number
+    return connections
 
 
 def part1() -> int:
-    seeds = parse_file("input.txt")
+    connection_pairs = parse_file("input.txt")
 
-    return sum(step_n(seed, 2000) for seed in seeds)
+    connections = defaultdict(set)
+    for first, second in connection_pairs:
+        connections[first].add(second)
+        connections[second].add(first)
+
+    connection_triples = set()
+    for first, second in connection_pairs:
+        shared_connections = connections[first].intersection(connections[second])
+        for shared_connection in shared_connections:
+            connection_triples.add(tuple(sorted([first, second, shared_connection])))
+
+    return len({
+        connection_triple
+        for connection_triple in connection_triples
+        if any(computer[0] == 't' for computer in connection_triple)
+    })
 
 
-def part2() -> int:
-    seeds = parse_file("input.txt")
+def part2() -> str:
+    connection_pairs = parse_file("input.txt")
 
-    revenue_by_sequence = defaultdict(lambda: 0)
+    cliques = set()
 
-    for seed in seeds:
-        number = seed
+    connections = defaultdict(set)
+    for first, second in connection_pairs:
+        connections[first].add(second)
+        connections[second].add(first)
 
-        sequences = set()
+        cliques.add(tuple(sorted((first, second))))
 
-        prices = deque([number % 10])
-        price_changes = deque()
+    while len(cliques) > 1:
+        larger_cliques = set()
+        for clique in cliques:
+            for computer in connections.keys():
+                if all(computer in connections[connected_computer] for connected_computer in clique):
+                    larger_cliques.add(tuple(sorted(clique + (computer,))))
 
-        for _ in range(2000):
-            number = step(number)
+        cliques = larger_cliques
 
-            prices.append(number % 10)
-            price_changes.append(prices[-1] - prices[-2])
-
-            if len(price_changes) == 4:
-                sequence = tuple(price_changes)
-                if sequence not in sequences:
-                    revenue_by_sequence[sequence] += prices[-1]
-
-                    sequences.add(sequence)
-
-                prices.popleft()
-                price_changes.popleft()
-
-    max_sequence, max_revenue = (), 0
-    for sequence, revenue in revenue_by_sequence.items():
-        if revenue > max_revenue:
-            max_sequence, max_revenue = sequence, revenue
-
-    return max_revenue
-
+    return ','.join(next(iter(cliques)))
 
 print(f"Part 1: {part1()}")
 print(f"Part 2: {part2()}")
