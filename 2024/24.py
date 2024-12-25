@@ -23,7 +23,7 @@ def parse_file(filename: str) -> [dict[str, bool], dict[str, tuple[str, str, str
     return inputs, gates
 
 
-def order_wires(gates: dict[str, tuple[str, str, str]]) -> list[str]:
+def order_wires(gates: dict[str, tuple[str, str, str]]) -> list[str] | None:
     nodes = set()
     edges = defaultdict(set)
     in_counts = defaultdict(lambda: 0)
@@ -38,7 +38,11 @@ def order_wires(gates: dict[str, tuple[str, str, str]]) -> list[str]:
     while nodes:
         nodes_sorted = list(sorted(nodes, key=lambda node: in_counts[node]))
 
-        for node in (n for n in nodes_sorted if in_counts[n] == 0):
+        stem_nodes = set(n for n in nodes_sorted if in_counts[n] == 0)
+        if not stem_nodes:
+            return None
+
+        for node in stem_nodes:
             ordered_wires.append(node)
 
             nodes.remove(node)
@@ -56,10 +60,14 @@ def build_int(values: dict[str, bool], prefix: str) -> int:
     return value
 
 
-def evaluate(inputs: dict[str, bool], gates: dict[str, tuple[str, str, str]]) -> int:
+def evaluate(inputs: dict[str, bool], gates: dict[str, tuple[str, str, str]]) -> int | None:
     outputs = {}
 
-    for node in order_wires(gates):
+    wires_ordered = order_wires(gates)
+    if not wires_ordered:
+        return None
+
+    for node in wires_ordered:
         if node in inputs:
             outputs[node] = inputs[node]
             continue
@@ -81,10 +89,73 @@ def part1() -> int:
     return evaluate(inputs, gates)
 
 
-def part2() -> int:
+def part2() -> str:
     inputs, gates = parse_file("input.txt")
 
-    return 0
+    swaps = [
+        ('vvr', 'z08'),
+        ('tfb', 'z28'),
+        ('mqh', 'z39'),
+        ('bkr', 'rnq')
+    ]
+    for swap in swaps:
+        gates[swap[0]], gates[swap[1]] = gates[swap[1]], gates[swap[0]]
+
+    gates_reversed = {}
+    for output_node, gate in gates.items():
+        gates_reversed[gate] = output_node
+
+    def find_gate(first_input: str, second_input: str, operator: str) -> tuple[str, str, str] | None:
+        if (first_input, operator, second_input) in gates_reversed:
+            return first_input, operator, second_input
+        elif (second_input, operator, first_input) in gates_reversed:
+            return second_input, operator, first_input
+        else:
+            return None
+
+    current_bits = None
+    current_result = None
+    for output_node in sorted(node for node in gates.keys() if node[0] == 'z')[:-1]:
+        previous_bits = current_bits
+        previous_result = current_result
+
+        current_bits = (output_node.replace('z', 'x'), output_node.replace('z', 'y'))
+
+        if output_node == 'z00':
+            current_sum = 'z00'
+            current_result = current_sum
+            continue
+
+        current_sum = gates_reversed[find_gate(current_bits[0], current_bits[1], 'XOR')]
+        current_carry = gates_reversed[find_gate(previous_bits[0], previous_bits[1], 'AND')]
+        current_result = output_node
+
+        if output_node == 'z01':
+            continue
+
+        previous_result_gate = find_gate(gates[previous_result][0], gates[previous_result][2], 'AND')
+        if not previous_result_gate:
+            print((gates[previous_result][0], 'AND', gates[previous_result][2]))
+            continue
+
+        previous_result = gates_reversed[previous_result_gate]
+
+        previous_result_with_carry_gate = find_gate(previous_result, current_carry, 'OR')
+        if not previous_result_with_carry_gate:
+            print((previous_result, 'OR', current_carry))
+            continue
+
+        previous_result_with_carry = gates_reversed[previous_result_with_carry_gate]
+
+        current_result_gate = find_gate(previous_result_with_carry, current_sum, 'XOR')
+        if not current_result_gate:
+            print((previous_result_with_carry, 'XOR', current_sum))
+            continue
+
+        if gates_reversed[current_result_gate] != current_result:
+            print(f"{(previous_result_with_carry, 'XOR', current_sum)} | {gates_reversed[current_result_gate]}")
+
+    return ','.join(sorted(node for swap in swaps for node in swap))
 
 print(f"Part 1: {part1()}")
 print(f"Part 2: {part2()}")
