@@ -46,4 +46,4 @@ def part1() -> int:
 
     return match_count
 
-print(f"Part 1: {part1()}")\
+print(f"Part 1: {part1()}")
