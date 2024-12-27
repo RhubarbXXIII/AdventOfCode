@@ -24,7 +24,9 @@ class Day06 extends Day {
   late final UnmodifiableListView<Instruction> instructions;
 
   Day06() {
-    var _instructions = <Instruction>[];
+    var instructionsList = <Instruction>[];
+    instructions = UnmodifiableListView(instructionsList);
+
     for (final line in readFileLines("input.txt")) {
       var lineSplit = line.split(' ');
 
@@ -37,10 +39,8 @@ class Day06 extends Day {
 
       lineSplit.removeLast();
 
-      _instructions.add(Instruction(lineSplit.last, start, end));
+      instructionsList.add(Instruction(lineSplit.last, start, end));
     }
-
-    instructions = UnmodifiableListView(_instructions);
   }
 
   @override
