@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'dart:math';
 
 import 'package:aoc_2015/day.dart';
 
@@ -43,7 +42,8 @@ class Day02 extends Day {
   @override
   String part2() {
     var packageRibbonLength = packageDimensions
-      .map((d) => (d.asList()..sort()).take(2).reduce((a, b) => 2 * (a + b)) + d.asList().reduce((a, b) => a * b))
+      .map((d) => (d.asList()..sort()).take(2).reduce((a, b) => 2 * (a + b)) 
+        + d.asList().reduce((a, b) => a * b))
       .reduce((a, b) => a + b);
 
     return packageRibbonLength.toString();
