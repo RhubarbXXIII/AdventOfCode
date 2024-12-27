@@ -43,6 +43,10 @@ class Position {
 
   const Position(this.row, this.column);
 
+  Position.parse(String string, [String separator = ','])
+    : row = int.parse(string.split(separator)[0]),
+      column = int.parse(string.split(separator)[1]);
+
   Position operator+(Direction direction) {
     return Position(row + direction.vertical, column + direction.horizontal);
   }
