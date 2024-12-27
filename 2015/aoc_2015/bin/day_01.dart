@@ -1,11 +1,13 @@
+import 'dart:collection';
+
 import 'package:aoc_2015/day.dart';
 
 class Day01 extends Day {
 
-  late final List<String> floorSteps;
+  late final UnmodifiableListView<String> floorSteps;
 
   Day01() {
-    floorSteps = readFile("input.txt").split('');
+    floorSteps = UnmodifiableListView(readFile("input.txt").split(''));
   }
 
   @override
