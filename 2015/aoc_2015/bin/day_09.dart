@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:aoc_2015/day.dart';
+import 'package:aoc_2015/numbers.dart';
 
 class Day09 extends Day {
 
@@ -14,25 +15,15 @@ class Day09 extends Day {
     });
   }
 
-  List<List<String>> _permute(List<String> strings) {
-    if (strings.length <= 1) {
-      return [strings];
-    }
-
-    return strings
-      .map((string) => _permute(strings.where((s) => s != string).toList())
-        .map((l) => [string, ...l]).toList())
-      .reduce((a, b) => a..addAll(b));
-  }
-
   @override
   String part1() {
-    return _permute(
+    return permute(
         edges.keys
           .map((l) => l.split(','))
           .expand((l) => l)
           .toSet()
           .toList())
+      .map((l) => l.toList())
       .map((l) {
         var distance = 0;
         for (var i = 0; i < l.length - 1; i++) {
@@ -46,12 +37,13 @@ class Day09 extends Day {
 
   @override
   String part2() {
-    return _permute(
+    return permute(
         edges.keys
           .map((l) => l.split(','))
           .expand((l) => l)
           .toSet()
           .toList())
+      .map((l) => l.toList())
       .map((l) {
         var distance = 0;
         for (var i = 0; i < l.length - 1; i++) {
