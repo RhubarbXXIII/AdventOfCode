@@ -26,7 +26,8 @@ class Day17 extends Day {
       .map((bits) => Iterable.generate(containers.length)
         .where((i) => (bits >> i) & 1 == 1)
         .map((i) => containers[i])
-        .fold(0, (a, b) => a + b))
+        .fold(0, (a, b) => a + b)
+      )
       .where((c) => c == capacity)
       .length
       .toString();
@@ -35,19 +36,21 @@ class Day17 extends Day {
   @override
   String part2() {
     return groupBy(
-        Iterable.generate(pow(2, containers.length).toInt())
-          .where((bits) => Iterable.generate(containers.length)
-            .where((i) => (bits >> i) & 1 == 1)
-            .map((i) => containers[i])
-            .fold(0, (a, b) => a + b) == capacity),
-        (bits) => Iterable.generate(containers.length)
+      Iterable.generate(pow(2, containers.length).toInt())
+        .where((bits) => Iterable.generate(containers.length)
           .where((i) => (bits >> i) & 1 == 1)
-          .length)
-      .entries
-      .reduce((a, b) => a.key < b.key ? a : b)
-      .value
-      .length
-      .toString();
+          .map((i) => containers[i])
+          .fold(0, (a, b) => a + b) == capacity
+        ),
+      (bits) => Iterable.generate(containers.length)
+        .where((i) => (bits >> i) & 1 == 1)
+        .length
+    )
+    .entries
+    .reduce((a, b) => a.key < b.key ? a : b)
+    .value
+    .length
+    .toString();
   }
 }
 
