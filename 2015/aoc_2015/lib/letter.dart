@@ -17,13 +17,13 @@ class Letter {
   }
 
   static List<Letter> range([String from = 'a', String to = 'z']) {
-  if (from.length != 1 || to.length != 1) {
-    throw ArgumentError("'$from' and '$to' must be letters.");
-  }
+    if (from.length != 1 || to.length != 1) {
+      throw ArgumentError("'$from' and '$to' must be letters.");
+    }
 
-  var startCode = from.codeUnitAt(0);
-  var endCode = to.codeUnitAt(0);
-  return List.generate(
-    endCode - startCode + 1, (i) => Letter(String.fromCharCode(startCode + i)));
+    var startCode = from.codeUnitAt(0);
+    var endCode = to.codeUnitAt(0);
+    return List.generate(
+      endCode - startCode + 1, (i) => Letter(String.fromCharCode(startCode + i)));
   }
 }
