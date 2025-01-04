@@ -84,16 +84,7 @@ class Day18 extends Day {
   @override
   String part2() {
     var currentLights = initialLights;
-    // for (var row in currentLights.rows) {
-    //   print(row.map((l) => l ? '#' : '.').join(''));
-    // }
-    // print('');
     for (var _ in Iterable.generate(stepCount)) {
-      // currentLights = step(currentLights);
-      // for (var row in currentLights.rows) {
-      //   print(row.map((l) => l ? '#' : '.').join(''));
-      // }
-      // print('');
       var newLights = [
         for (var _ in Iterable.generate(height)) [for (var _ in Iterable.generate(width)) false]
       ];
