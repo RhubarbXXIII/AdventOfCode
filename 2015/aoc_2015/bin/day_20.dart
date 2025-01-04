@@ -1,8 +1,5 @@
-import 'dart:math';
-
 import 'package:aoc_2015/day.dart';
 import 'package:aoc_2015/numbers.dart';
-import 'package:collection/collection.dart';
 
 class Day20 extends Day {
 
