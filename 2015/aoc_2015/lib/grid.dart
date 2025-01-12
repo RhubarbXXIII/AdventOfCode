@@ -7,7 +7,7 @@ enum Direction {
   final int vertical;
   final int horizontal;
 
-  const Direction(this.horizontal, this.vertical);
+  const Direction(this.vertical, this.horizontal);
 
   factory Direction.fromArrow(String arrow) {
     return switch (arrow) {

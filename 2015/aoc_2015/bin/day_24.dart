@@ -4,11 +4,7 @@ import 'package:aoc_2015/day.dart';
 import 'package:collection/collection.dart';
 
 class Day24 extends Day {
-  static final SetEquality<int> intSetEquality = SetEquality();
-
   late final UnmodifiableListView<int> packages;
-
-  final Map<(int, String), Set<Set<int>>> sumCache = {};
 
   Day24() {
     packages = UnmodifiableListView(readFileLines("input.txt").map(int.parse));
@@ -43,10 +39,6 @@ class Day24 extends Day {
       .fold(double.maxFinite.toInt(), (a, b) => min(a, b));
     return sums.where((s) => s.length == minimumSumLength);
   }
-
-  // int _comparePackageLists(Iterable<int> a, Iterable<int> b) {
-  //   if ()
-  // }
 
   @override
   String part1() {
